@@ -9,6 +9,8 @@ import 'package:md_app/component/app_text_widget.dart';
 class ScanQrFromCameraView extends StatelessWidget {
   final QrScanController controller = Get.find();
 
+  ScanQrFromCameraView({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

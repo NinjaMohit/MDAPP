@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:md_app/util/app_color.dart';
 import 'package:md_app/util/app_textsize.dart';
 
@@ -16,22 +17,25 @@ class ApptextFormfeildUser extends StatelessWidget {
   final FocusNode? focusNode;
   final bool obscureText;
   final void Function(String)? onFieldSubmitted;
+  final List<TextInputFormatter>? inputFormatters;
 
-  const ApptextFormfeildUser(
-      {super.key,
-      required this.controller,
-      required this.hintText,
-      this.keyboardType = TextInputType.text,
-      this.textInputAction = TextInputAction.done,
-      this.validator,
-      this.obscureText = false,
-      this.enabled = true,
-      this.readOnly = false,
-      this.suffixIcon,
-      this.prefixIcon,
-      this.onChanged,
-      this.focusNode,
-      this.onFieldSubmitted});
+  const ApptextFormfeildUser({
+    super.key,
+    required this.controller,
+    required this.hintText,
+    this.keyboardType = TextInputType.text,
+    this.textInputAction = TextInputAction.done,
+    this.validator,
+    this.obscureText = false,
+    this.enabled = true,
+    this.readOnly = false,
+    this.suffixIcon,
+    this.prefixIcon,
+    this.onChanged,
+    this.focusNode,
+    this.onFieldSubmitted,
+    this.inputFormatters, // 🔹 Include in constructor
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +47,8 @@ class ApptextFormfeildUser extends StatelessWidget {
         keyboardType: keyboardType,
         validator: validator,
         readOnly: readOnly,
-        onChanged: onChanged,
+        onChanged: onChanged, inputFormatters: inputFormatters, // 🔹 Apply here
+
         obscureText: obscureText,
         focusNode: focusNode,
         onFieldSubmitted: onFieldSubmitted,

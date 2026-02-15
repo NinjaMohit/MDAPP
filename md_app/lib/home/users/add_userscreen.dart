@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:md_app/component/app_elevated_button.dart';
 import 'package:md_app/component/app_text_widget.dart';
@@ -96,7 +97,12 @@ class AddUserscreen extends StatelessWidget {
                         userController.nameFocusNode.unfocus();
                       },
                       validator: loginController.usernameValidator,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                            RegExp(r'[a-zA-Z0-9]')),
+                      ],
                     ),
+
                     SizedBox(
                       height: SizeConfig.heightMultiplier * 2,
                     ),
@@ -130,6 +136,10 @@ class AddUserscreen extends StatelessWidget {
                                 !userController.isPasswordVisible.value;
                           },
                         ),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                              RegExp(r'[a-zA-Z0-9]')),
+                        ],
                         onFieldSubmitted: (_) {
                           userController.passwordUserFocusNode.unfocus();
                         },
@@ -193,10 +203,8 @@ class AddUserscreen extends StatelessWidget {
                     AppElevatedButton(
                       text: "Register User",
                       onPressed: () async {
-                        int activeValue =
-                            await userController.isActive.value ? 1 : 0;
-                        int adminValue =
-                            await userController.isAdmin.value ? 1 : 0;
+                        int activeValue = userController.isActive.value ? 1 : 0;
+                        int adminValue = userController.isAdmin.value ? 1 : 0;
                         if (formKey.currentState!.validate()) {
                           await userController.register(
                               userController.nameController.text,

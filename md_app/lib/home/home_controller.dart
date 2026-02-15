@@ -9,13 +9,18 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart' as flutter;
 import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class ExportController extends GetxController {
   var selectedSociety = RxnString();
   var selectedDateRange = Rxn<DateTimeRange>();
-
+  int count = 0;
   Future<void> exportDataBySociety(context) async {
     // Get all customers
+    // Reset selections
+    selectedSociety.value = null; // Add this line
+    selectedDateRange.value = null;
+
     List<CustomerModel> customers = await DBHelper.getAllCustomers();
 
     // Get unique societies
@@ -200,45 +205,6 @@ class ExportController extends GetxController {
       return;
     }
 
-// // Create Excel file
-//     var excel = Excel.createExcel();
-//     excel.delete('Sheet1');
-//     Sheet sheet = excel['ScanReport'];
-
-// // Add headers: Customer Name, Society Name, Date Range, [each date]
-//     List<String> headers = [
-//       'Customer Name',
-//       'Society Name',
-//       'Date Range',
-//     ];
-//     headers.addAll(dates);
-//     sheet.appendRow(headers);
-
-// // Add rows per customer
-//     for (var customer in filteredCustomers) {
-//       List<String> row = [];
-//       row.add(customer.customerName ?? '');
-//       row.add(customer.societyName ?? '');
-//       row.add(
-//           '${DateFormat('yyyy-MM-dd').format(dateRange.start)} to ${DateFormat('yyyy-MM-dd').format(dateRange.end)}');
-
-//       for (var date in dates) {
-//         final scanRecords = await DBHelper.getDailyScans(date);
-//         final scanRecord = scanRecords.firstWhere(
-//           (record) => record['id'] == customer.id,
-//           orElse: () => <String, dynamic>{}, // empty map instead of null
-//         );
-
-//         // ignore: unnecessary_null_comparison
-//         String status = (scanRecord != null && scanRecord['scanned'] == 'Yes')
-//             ? 'Yes'
-//             : 'No';
-//         row.add(status);
-//       }
-
-//       sheet.appendRow(row);
-//     }
-
 // Create Excel file
     // Create Excel file
     var excel = Excel.createExcel();
@@ -247,11 +213,18 @@ class ExportController extends GetxController {
 
 // Add headers: Customer Name, Society Name, Date Range, [each date]
     List<String> headers = [
-      'Customer Name',
       'Society Name',
+      'Mobile No',
+      'Flat No',
+      'Customer Name',
       'Date Range',
     ];
-    headers.addAll(dates);
+    headers.add(''); // spacer column 1
+
+    for (var date in dates) {
+      headers.add(date); // actual date header
+      headers.add(''); // spacer column 1
+    }
     sheet.appendRow(headers);
 
 // Prepare the data with spacing
@@ -269,10 +242,14 @@ class ExportController extends GetxController {
 
       // Create the row for the current customer
       List<String> row = [];
-      row.add(customer.customerName ?? '');
       row.add(customer.societyName ?? '');
+      row.add(customer.customerMobile ?? '');
+      row.add(customer.flatNo ?? '');
+      row.add(customer.customerName ?? '');
       row.add(
           '${DateFormat('yyyy-MM-dd').format(dateRange.start)} to ${DateFormat('yyyy-MM-dd').format(dateRange.end)}');
+
+      row.add(''); // Spacer column
 
       for (var date in dates) {
         final scanRecords = await DBHelper.getDailyScans(date);
@@ -286,6 +263,7 @@ class ExportController extends GetxController {
             ? 'Yes'
             : 'No';
         row.add(status);
+        row.add(''); // Spacer column
       }
 
       rowsToAdd.add(row);
@@ -297,46 +275,66 @@ class ExportController extends GetxController {
     for (var row in rowsToAdd) {
       sheet.appendRow(row);
     }
+    if (Platform.isAndroid) {
+      final status = await Permission.manageExternalStorage.request();
+      if (!status.isGranted) {
+        await showDialog(
+          context: context,
+          builder: (_) => CustomValidationPopup(
+            message: "Manage External Storage permission not granted",
+          ),
+        );
+        return;
+      }
+    } else {
+      final status = await Permission.storage.request();
+      if (!status.isGranted) {
+        await showDialog(
+          context: context,
+          builder: (_) => CustomValidationPopup(
+            message: "Storage permission not granted",
+          ),
+        );
+        return;
+      }
+    }
     // Save Excel file
     Directory? directory;
     if (Platform.isAndroid) {
       directory = await getExternalStorageDirectory();
-      if (directory != null) {
-        String newPath = "";
-        List<String> folders = directory.path.split("/");
-        for (int i = 1; i < folders.length; i++) {
-          if (folders[i] != "Android") {
-            newPath += "/${folders[i]}";
-          } else {
-            break;
-          }
+      String newPath = "";
+      List<String> folders = directory!.path.split("/");
+      for (int i = 1; i < folders.length; i++) {
+        if (folders[i] != "Android") {
+          newPath += "/${folders[i]}";
+        } else {
+          break;
         }
-        newPath = "$newPath/Download";
-        directory = Directory(newPath);
       }
+      newPath = "$newPath/Download";
+      directory = Directory(newPath);
     } else {
       directory = await getApplicationDocumentsDirectory();
     }
 
-    if (directory == null || !await directory.exists()) {
-      await directory?.create(recursive: true);
+    if (!await directory.exists()) {
+      await directory.create(recursive: true);
     }
+    count++;
+    final today = DateTime.now();
 
+    final formattedDate =
+        "${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}";
     String filePath =
-        '${directory!.path}/scan_report_${DateTime.now().millisecondsSinceEpoch}.xlsx';
+        '${directory.path}/scan_report_${formattedDate}_$count.xlsx';
     final file = File(filePath);
     await file.create(recursive: true);
     await file.writeAsBytes(excel.encode()!);
 
-    await Get.dialog(
-      AlertDialog(
-        content: Text("Export successful.\nSaved at:\n$filePath"),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text("OK"),
-          ),
-        ],
+    await showDialog(
+      context: context,
+      builder: (_) => CustomValidationPopup(
+        message: "Export successful.",
       ),
     );
 
@@ -350,6 +348,7 @@ class ExportController extends GetxController {
   Future<void> deleteScanDataByDateRange(context) async {
     // Insert test data to ensure there are records to delete
     // await DBHelper.insertTestDailyScans();
+    selectedDateRange.value = null;
 
     // Show dialog for date range selection
     bool? confirmed = await Get.dialog<bool>(
@@ -477,15 +476,10 @@ class ExportController extends GetxController {
     }
 
     // Show confirmation
-    await Get.dialog(
-      AlertDialog(
-        content: Text("Successfully deleted $deletedCount scan records."),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text("OK"),
-          ),
-        ],
+    await showDialog(
+      context: context,
+      builder: (_) => CustomValidationPopup(
+        message: "Successfully deleted $deletedCount scan records.",
       ),
     );
 

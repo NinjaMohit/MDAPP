@@ -101,14 +101,10 @@ Future<void> exportHistoryToExcel(BuildContext context) async {
   Directory? directory;
   if (Platform.isAndroid) {
     directory = await getExternalStorageDirectory();
-    if (directory == null) {
-      print("Could not get external storage directory");
-      return;
-    }
 
     // Adjust path to Downloads folder on Android
     String newPath = "";
-    List<String> folders = directory.path.split("/");
+    List<String> folders = directory!.path.split("/");
     for (int i = 1; i < folders.length; i++) {
       if (folders[i] != "Android") {
         newPath += "/${folders[i]}";

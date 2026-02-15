@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:intl/intl.dart';
 import 'package:md_app/database/qr_send.dart';
 import 'package:md_app/global_var.dart';
 import 'package:md_app/home/customer/customer_model.dart';
@@ -344,4 +345,26 @@ class DBHelper {
       whereArgs: [startDate, endDate],
     );
   }
+
+  static Future<List<Map<String, dynamic>>> getTodayScans() async {
+    try {
+      final db = await database;
+      final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      return await db.rawQuery('''
+      SELECT c.id, c.customerName, c.societyName, c.customerMobile, ds.scanned
+      FROM customers c
+      INNER JOIN daily_scans ds ON c.id = ds.customerId
+      WHERE c.isActive = 1 AND date(ds.scanDate) = ? AND LOWER(ds.scanned) = 'yes'
+      ORDER BY c.societyName, c.customerName
+    ''', [today]);
+    } catch (e) {
+      print('Error fetching scans: $e');
+      return [];
+    }
+  }
+
+
+
+
+
 }

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:md_app/component/app_text_widget.dart';
+import 'package:md_app/export_data/excel_All.dart';
 import 'package:md_app/global_var.dart';
 import 'package:md_app/home/customer/customer_screen.dart';
 import 'package:md_app/home/home_controller.dart';
+import 'package:md_app/home/scanned_user_data.dart';
 import 'package:md_app/home/users/user_controller.dart';
 import 'package:md_app/home/users/user_screen.dart';
 import 'package:md_app/login/login_controller.dart';
@@ -23,7 +25,6 @@ class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
 
   final List<String> listName = ["Users", "Customers", "Scan Users"];
-  final List<String> listisNotAdmin = ["Scan Users"];
 
   @override
   Widget build(BuildContext context) {
@@ -142,194 +143,208 @@ class HomeScreen extends StatelessWidget {
             ),
           ],
         ),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(
-              height: SizeConfig.heightMultiplier * 3,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                GestureDetector(
-                  onTap: () async {
-                    try {
-                      await exportController.exportDataBySociety(context);
-                    } catch (e) {
-                      print('Failed to export history: $e');
-                    }
-                  },
-                  child: Container(
-                    padding: EdgeInsets.all(3),
-                    alignment: Alignment.center,
-                    height: 50,
-                    width: 160,
-                    decoration: BoxDecoration(
-                        color: AppColors.buttoncolor,
-                        borderRadius: BorderRadius.circular(16)),
-                    child: AppTextWidget(
-                      text: "Export Society Data",
-                      fontSize: AppTextSize.textSizeSmallm,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.primary,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-                // GestureDetector(
-                //   onTap: () async {
-                //     try {
-                //       await exportHistoryToExcel(
-                //         context,
-                //       );
-                //     } catch (e) {
-                //       print('Failed to export history: $e');
-                //     }
-                //   },
-                //   child: Container(
-                //     padding: EdgeInsets.all(3),
-                //     alignment: Alignment.center,
-                //     height: 70,
-                //     width: 96,
-                //     decoration: BoxDecoration(
-                //         color: AppColors.buttoncolor,
-                //         borderRadius: BorderRadius.circular(16)),
-                //     child: AppTextWidget(
-                //       text: "Export Histroy Data",
-                //       fontSize: AppTextSize.textSizeSmallm,
-                //       fontWeight: FontWeight.w500,
-                //       color: AppColors.primary,
-                //       textAlign: TextAlign.center,
-                //     ),
-                //   ),
-                // ),
-                GestureDetector(
-                  onTap: () async {
-                    try {
-                      await exportController.deleteScanDataByDateRange(context);
-                    } catch (e) {
-                      print('Failed to export history: $e');
-                    }
-                  },
-                  child: Container(
-                    padding: EdgeInsets.all(3),
-                    alignment: Alignment.center,
-                    height: 50,
-                    width: 160,
-                    decoration: BoxDecoration(
-                        color: AppColors.buttoncolor,
-                        borderRadius: BorderRadius.circular(16)),
-                    child: AppTextWidget(
-                      text: "Delete Histroy Data",
-                      fontSize: AppTextSize.textSizeSmallm,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.primary,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(
-              height: SizeConfig.heightMultiplier * 5,
-            ),
-            Expanded(
-              child: GridView.builder(
-                padding: EdgeInsets.all(16),
-                itemCount: isAdmin ? listName.length : listisNotAdmin.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 24,
-                  mainAxisSpacing: 30,
-                  childAspectRatio: 1,
-                ),
-                itemBuilder: (context, index) {
-                  return isAdmin
-                      ? GestureDetector(
-                          onTap: () {
-                            if (index == 0) {
-                              userController.resetForm();
-                              Get.to(UserScreen());
-                            }
-                            if (index == 1) {
-                              Get.to(CustomerScreen());
-                            }
-                            if (index == 2) {
-                              qrScanController.scannedCustomer.value = null;
-                              qrScanController.errorMessage.value = '';
-
-                              Get.to(() => ScanQrFromGalleryView());
-                            }
-                          },
-                          child: Container(
-                            alignment: Alignment.center,
-                            height: SizeConfig.imageSizeMultiplier * 30,
-                            width: SizeConfig.imageSizeMultiplier * 32,
-                            decoration: BoxDecoration(
-                              color: AppColors.buttoncolor,
-                              borderRadius: BorderRadius.circular(10),
-                              // border: Border.all(
-                              //   color: const Color.fromARGB(255, 105, 105, 105),
-                              //   width: 1,
-                              // ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color.fromARGB(255, 61, 59, 59)
-                                      .withOpacity(0.2),
-                                  blurRadius: 6,
-                                  offset: Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: AppTextWidget(
-                              text: listName[index],
-                              fontSize: AppTextSize.textSizeMediumm,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        )
-                      : GestureDetector(
-                          onTap: () {
-                            // if (index == 0) {
-                            //   userController.resetForm();
-                            //   Get.to(UserScreen());
-                            // }
-                          },
-                          child: Container(
-                            alignment: Alignment.center,
-                            height: SizeConfig.imageSizeMultiplier * 30,
-                            width: SizeConfig.imageSizeMultiplier * 32,
-                            decoration: BoxDecoration(
-                              color: AppColors.buttoncolor,
-                              borderRadius: BorderRadius.circular(10),
-                              // border: Border.all(
-                              //   color: const Color.fromARGB(255, 105, 105, 105),
-                              //   width: 1,
-                              // ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color.fromARGB(255, 61, 59, 59)
-                                      .withOpacity(0.2),
-                                  blurRadius: 6,
-                                  offset: Offset(0, 2),
-                                ),
-                              ],
-                            ),
-                            child: AppTextWidget(
-                              text: listisNotAdmin[index],
-                              fontSize: AppTextSize.textSizeMediumm,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primary,
-                            ),
-                          ),
-                        );
-                },
+        body: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(
+                height: SizeConfig.heightMultiplier * 3,
               ),
-            ),
-          ],
+              Obx(
+                () => userAdmin.value
+                    ? Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              GestureDetector(
+                                onTap: () async {
+                                  try {
+                                    await exportController
+                                        .exportDataBySociety(context);
+                                  } catch (e) {
+                                    print('Failed to export history: $e');
+                                  }
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.all(3),
+                                  alignment: Alignment.center,
+                                  height: 50,
+                                  width: 160,
+                                  decoration: BoxDecoration(
+                                      color: AppColors.buttoncolor,
+                                      borderRadius: BorderRadius.circular(16)),
+                                  child: AppTextWidget(
+                                    text: "Export Society Data",
+                                    fontSize: AppTextSize.textSizeSmallm,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.primary,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () async {
+                                  try {
+                                    await exportController
+                                        .deleteScanDataByDateRange(context);
+                                  } catch (e) {
+                                    print('Failed to export history: $e');
+                                  }
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.all(3),
+                                  alignment: Alignment.center,
+                                  height: 50,
+                                  width: 160,
+                                  decoration: BoxDecoration(
+                                      color: AppColors.buttoncolor,
+                                      borderRadius: BorderRadius.circular(16)),
+                                  child: AppTextWidget(
+                                    text: "Delete Histroy Data",
+                                    fontSize: AppTextSize.textSizeSmallm,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.primary,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              GestureDetector(
+                                onTap: () async {
+                                  try {
+                                    await exportAllTablesToExcel(context);
+                                  } catch (e) {
+                                    print('Failed to export data: $e');
+                                  }
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.all(3),
+                                  alignment: Alignment.center,
+                                  height: 50,
+                                  width: 160,
+                                  decoration: BoxDecoration(
+                                      color: AppColors.buttoncolor,
+                                      borderRadius: BorderRadius.circular(16)),
+                                  child: AppTextWidget(
+                                    text: "Export All Data",
+                                    fontSize: AppTextSize.textSizeSmallm,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.primary,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () async {
+                                  try {
+                                    Get.to(TodayScansView());
+                                  } catch (e) {
+                                    print('Failed to export data: $e');
+                                  }
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.all(3),
+                                  alignment: Alignment.center,
+                                  height: 50,
+                                  width: 160,
+                                  decoration: BoxDecoration(
+                                      color: AppColors.buttoncolor,
+                                      borderRadius: BorderRadius.circular(16)),
+                                  child: AppTextWidget(
+                                    text: "Todays Scanned Customer",
+                                    fontSize: AppTextSize.textSizeSmallm,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.primary,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                        ],
+                      )
+                    : SizedBox(),
+              ),
+              SizedBox(
+                height: SizeConfig.heightMultiplier * 5,
+              ),
+              Obx(() {
+                // Filter the list based on admin check
+                final filteredList = userAdmin.value
+                    ? listName
+                    : listName.sublist(1); // Removes index 0 if not admin
+
+                return GridView.builder(
+                  shrinkWrap: true, // Important fix
+                  physics:
+                      NeverScrollableScrollPhysics(), // Disable inner scrolling
+                  padding: EdgeInsets.all(16),
+                  itemCount: filteredList.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 24,
+                    mainAxisSpacing: 30,
+                    childAspectRatio: 1,
+                  ),
+                  itemBuilder: (context, index) {
+                    final actualIndex = userAdmin.value ? index : index + 1;
+
+                    return GestureDetector(
+                      onTap: () {
+                        if (actualIndex == 0) {
+                          userController.resetForm();
+                          Get.to(UserScreen());
+                        } else if (actualIndex == 1) {
+                          Get.to(CustomerScreen());
+                        } else if (actualIndex == 2) {
+                          qrScanController.scannedCustomer.value = null;
+                          qrScanController.errorMessage.value = '';
+                          Get.to(() => ScanQrFromGalleryView());
+                        }
+                      },
+                      child: Container(
+                        alignment: Alignment.center,
+                        height: SizeConfig.imageSizeMultiplier * 30,
+                        width: SizeConfig.imageSizeMultiplier * 32,
+                        decoration: BoxDecoration(
+                          color: AppColors.buttoncolor,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color.fromARGB(255, 61, 59, 59)
+                                  .withOpacity(0.2),
+                              blurRadius: 6,
+                              offset: Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: AppTextWidget(
+                          text: filteredList[index], // Use filtered list
+                          fontSize: AppTextSize.textSizeMediumm,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    );
+                  },
+                );
+              }),
+            ],
+          ),
         ),
       ),
     );

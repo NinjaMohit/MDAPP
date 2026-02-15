@@ -6,8 +6,15 @@ import 'package:md_app/util/size_config.dart';
 
 class CustomValidationPopup extends StatelessWidget {
   final String message;
+  final VoidCallback? onConfirm; // Add optional onConfirm callback
+  final String? confirmText; // Add optional confirmText for button label
 
-  const CustomValidationPopup({super.key, required this.message});
+  const CustomValidationPopup({
+    super.key,
+    required this.message,
+    this.onConfirm,
+    this.confirmText,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -32,11 +39,10 @@ class CustomValidationPopup extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(Icons.info,
-              size: 40, color: AppColors.buttoncolor), // Added an info icon
+          Icon(Icons.info, size: 40, color: AppColors.buttoncolor), // Info icon
           SizedBox(height: 16),
           AppTextWidget(
-            text: message, // Display the passed message
+            text: message,
             fontSize: AppTextSize.textSizeMedium,
             color: AppColors.buttoncolor,
             fontWeight: FontWeight.w600,
@@ -45,6 +51,7 @@ class CustomValidationPopup extends StatelessWidget {
           SizedBox(height: 20),
           ElevatedButton(
             onPressed: () {
+              onConfirm?.call(); // Call onConfirm if provided
               Navigator.of(context).pop(); // Close the popup
             },
             style: ElevatedButton.styleFrom(
@@ -54,7 +61,7 @@ class CustomValidationPopup extends StatelessWidget {
               ),
             ),
             child: Text(
-              "OK",
+              confirmText ?? "OK", // Use confirmText if provided, else "OK"
               style: TextStyle(color: Colors.white),
             ),
           ),

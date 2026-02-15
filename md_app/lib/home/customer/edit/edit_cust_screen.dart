@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:md_app/component/app_elevated_button.dart';
 import 'package:md_app/component/app_search_dropdown.dart';
@@ -167,7 +168,6 @@ class EditCustScreen extends StatelessWidget {
                           controller: editCustController.flatCustController,
                           hintText: "Enter Flat No",
                           focusNode: editCustController.flatFocusNode,
-                          keyboardType: TextInputType.number,
                           onFieldSubmitted: (_) {
                             editCustController.flatFocusNode.unfocus();
                           },
@@ -213,6 +213,11 @@ class EditCustScreen extends StatelessWidget {
                         height: SizeConfig.heightMultiplier * 1,
                       ),
                       ApptextFormfeildUser(
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(10),
+                        ],
+
                         controller: editCustController.custMobileCustController,
                         hintText: "Enter Customer Mobile No",
                         keyboardType: TextInputType.number,
@@ -267,7 +272,7 @@ class EditCustScreen extends StatelessWidget {
                         text: "Register User",
                         onPressed: () async {
                           int activeValue =
-                              await editCustController.isActive.value ? 1 : 0;
+                              editCustController.isActive.value ? 1 : 0;
 
                           if (formKey.currentState!.validate()) {
                             await editCustController.updateCustomer(

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:md_app/component/app_elevated_button.dart';
@@ -91,7 +93,7 @@ class CustomerScreen extends StatelessWidget {
             }
 
             final users = snapshot.data!;
-
+log('Customer list length: ${users.length}'); // Print customer list length
             return Padding(
               padding: const EdgeInsets.only(left: 5, right: 5),
               child: Column(
@@ -165,6 +167,8 @@ class CustomerScreen extends StatelessWidget {
                       itemCount: users.length,
                       itemBuilder: (context, index) {
                         final user = users[index];
+                        log('Customer Id:${index} ${user.id} --  ${user.id}');
+
                         return Container(
                           padding: EdgeInsets.symmetric(
                               vertical: 10, horizontal: 16),

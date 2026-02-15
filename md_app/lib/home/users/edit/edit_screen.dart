@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:md_app/component/app_elevated_button.dart';
 import 'package:md_app/component/app_text_widget.dart';
@@ -95,6 +96,10 @@ class EditScreen extends StatelessWidget {
                         Icons.person,
                         color: AppColors.primaryText,
                       ),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                            RegExp(r'[a-zA-Z0-9]')),
+                      ],
                       focusNode: editController.nameEditFocusNode,
                       onFieldSubmitted: (_) {
                         editController.nameEditFocusNode.unfocus();
@@ -118,6 +123,10 @@ class EditScreen extends StatelessWidget {
                         hintText: "Enter Password",
                         obscureText:
                             !editController.isPasswordEditVisible.value,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                              RegExp(r'[a-zA-Z0-9]')),
+                        ],
                         prefixIcon: Icon(
                           Icons.password,
                           color: AppColors.primaryText,
@@ -199,9 +208,9 @@ class EditScreen extends StatelessWidget {
                       text: "Update User",
                       onPressed: () async {
                         int activeValue =
-                            await editController.isEditActive.value ? 1 : 0;
+                            editController.isEditActive.value ? 1 : 0;
                         int adminValue =
-                            await editController.isEditAdmin.value ? 1 : 0;
+                            editController.isEditAdmin.value ? 1 : 0;
                         if (formKey.currentState!.validate()) {
                           if (formKey.currentState!.validate()) {
                             await editController.updateUser(

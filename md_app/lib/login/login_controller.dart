@@ -49,6 +49,12 @@ class LoginController extends GetxController {
 
         isAdmin = await storage.read('isAdmin') == 1;
         userId.value = await storage.read('userId');
+        final loginname = await storage.read('username');
+        if (loginname == "admin") {
+          userAdmin.value = true;
+        } else {
+          userAdmin.value = false;
+        }
         if (user.isActive == 1) {
           Get.offAll(() => HomeScreen());
         } else {

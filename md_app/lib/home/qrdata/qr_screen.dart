@@ -12,7 +12,7 @@ import 'package:md_app/util/validation_popup.dart';
 
 class QrScreen extends StatelessWidget {
   final CustomerModel customer;
-  QrScreen({super.key, required this.customer});
+  const QrScreen({super.key, required this.customer});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
